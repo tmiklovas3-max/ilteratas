@@ -1,6 +1,5 @@
 window.onload = async function() {
 
-const canvas = document.getElementById("wheel"); // nebūtinas, bet paliekam jei dar turi
 const container = document.getElementById("names");
 
 // 👉 nuskaitom CSV
@@ -9,7 +8,7 @@ const text = await response.text();
 
 const rows = text.split("\n");
 
-// 👉 randam stulpelius pagal pavadinimus
+// 👉 randam stulpelius
 const headers = rows[0].split(",");
 
 const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
@@ -39,7 +38,7 @@ for (let i = 1; i < rows.length; i++) {
   }
 }
 
-// 👉 išvalom nesąmones
+// 👉 išvalom šiukšles
 names = names.filter(n => 
   n &&
   !n.includes("@") &&
@@ -47,13 +46,13 @@ names = names.filter(n =>
   n.length > 3
 );
 
-// 👉 padauginam listą kad scroll būtų ilgas
+// 👉 padauginam listą
 let loop = [];
 for (let i = 0; i < 20; i++) {
   loop = loop.concat(names);
 }
 
-// 👉 sugeneruojam HTML
+// 👉 sukuriam DOM
 loop.forEach(name => {
   const div = document.createElement("div");
   div.className = "name";
@@ -81,17 +80,23 @@ function spin() {
   setTimeout(() => {
     clearInterval(interval);
 
-    // 👉 randam Angelę visame liste
     const all = document.querySelectorAll(".name");
 
-    let winnerIndex = 0;
+    // 👉 surandam visas Angelės vietas
+    let matches = [];
 
     for (let i = 0; i < all.length; i++) {
       if (all[i].innerText === winnerName) {
-        winnerIndex = i;
-        break;
+        matches.push(i);
       }
     }
+
+    // 👉 imam tą, kuri arčiausiai vidurio
+    const middle = Math.floor(all.length / 2);
+
+    let winnerIndex = matches.reduce((prev, curr) =>
+      Math.abs(curr - middle) < Math.abs(prev - middle) ? curr : prev
+    );
 
     const itemHeight = 90;
     const centerOffset = 180;
