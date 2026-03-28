@@ -2,13 +2,12 @@ window.onload = async function() {
 
 const container = document.getElementById("names");
 
-// 👉 nuskaitom CSV
+// CSV
 const response = await fetch("data.csv");
 const text = await response.text();
-
 const rows = text.split("\n");
 
-// 👉 randam stulpelius
+// headeriai
 const headers = rows[0].split(",");
 
 const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
@@ -17,42 +16,32 @@ const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes(
 const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
 const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
-// 👉 surenkam vardus
+// vardai
 let names = [];
 
 for (let i = 1; i < rows.length; i++) {
   const cols = rows[i].split(",");
 
-  const name1 = cols[nameIndex]?.trim();
-  const surname1 = cols[surnameIndex]?.trim();
+  const n1 = cols[nameIndex]?.trim();
+  const s1 = cols[surnameIndex]?.trim();
 
-  const name2 = cols[name2Index]?.trim();
-  const surname2 = cols[surname2Index]?.trim();
+  const n2 = cols[name2Index]?.trim();
+  const s2 = cols[surname2Index]?.trim();
 
-  if (name1 && surname1) {
-    names.push(name1 + " " + surname1);
-  }
-
-  if (name2 && surname2) {
-    names.push(name2 + " " + surname2);
-  }
+  if (n1 && s1) names.push(n1 + " " + s1);
+  if (n2 && s2) names.push(n2 + " " + s2);
 }
 
-// 👉 išvalom šiukšles
-names = names.filter(n => 
-  n &&
-  !n.includes("@") &&
-  !n.includes("true") &&
-  n.length > 3
-);
+// cleanup
+names = names.filter(n => n && !n.includes("@") && n.length > 3);
 
-// 👉 padauginam listą
+// loop
 let loop = [];
 for (let i = 0; i < 20; i++) {
   loop = loop.concat(names);
 }
 
-// 👉 sukuriam DOM
+// render
 loop.forEach(name => {
   const div = document.createElement("div");
   div.className = "name";
@@ -60,57 +49,69 @@ loop.forEach(name => {
   container.appendChild(div);
 });
 
-let position = 0;
+// config
+const itemHeight = 90;
+const visibleCenter = 180;
+
 let spinning = false;
 
-// 🎯 LAIMĖTOJAS
+// 🎯 winner
 const winnerName = "Angelė Urbonaitė";
 
 function spin() {
   if (spinning) return;
   spinning = true;
 
-  let speed = 50;
+  const all = document.querySelectorAll(".name");
 
-  const interval = setInterval(() => {
-    position += speed;
-    container.style.transform = `translateY(-${position}px)`;
-  }, 16);
-
-  setTimeout(() => {
-    clearInterval(interval);
-
-    const all = document.querySelectorAll(".name");
-
-    // 👉 surandam visas Angelės vietas
-    let matches = [];
-
-    for (let i = 0; i < all.length; i++) {
-      if (all[i].innerText === winnerName) {
-        matches.push(i);
-      }
+  // surandam visas Angelės pozicijas
+  let matches = [];
+  for (let i = 0; i < all.length; i++) {
+    if (all[i].innerText === winnerName) {
+      matches.push(i);
     }
+  }
 
-    // 👉 imam tą, kuri arčiausiai vidurio
-    const middle = Math.floor(all.length / 2);
+  // imam vidurinę (geriausia UX)
+  const targetIndex = matches[Math.floor(matches.length / 2)];
 
-    let winnerIndex = matches.reduce((prev, curr) =>
-      Math.abs(curr - middle) < Math.abs(prev - middle) ? curr : prev
-    );
+  const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-    const itemHeight = 90;
-    const centerOffset = 180;
+  // 👉 pradedam nuo dabartinės pozicijos
+  let start = null;
+  const duration = 6000; // ilgiau sukasi
 
-    const finalPos = winnerIndex * itemHeight - centerOffset;
+  // 👉 kiek suksis papildomai (scroll kiekis)
+  const startPos = 0;
+  const extraSpin = 3000; // kiek px „prasukti“ prieš sustojant
 
-    container.style.transition = "transform 1.5s ease-out";
-    container.style.transform = `translateY(-${finalPos}px)`;
+  function animate(t) {
+    if (!start) start = t;
 
-    document.getElementById("winner").innerText = "🎉 Laimėjo: " + winnerName;
+    let progress = (t - start) / duration;
+    if (progress > 1) progress = 1;
 
-    spinning = false;
+    // ease out
+    const ease = 1 - Math.pow(1 - progress, 3);
 
-  }, 3000);
+    // 👉 nuo greito sukimo į tikslų sustojimą
+    const current = startPos + (extraSpin + finalPosition) * ease;
+
+    container.style.transform = `translateY(-${current}px)`;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      container.style.transform = `translateY(-${finalPosition}px)`;
+
+      document.getElementById("winner").innerText =
+        "🎉 Laimėjo: " + winnerName;
+
+      spinning = false;
+    }
+  }
+
+  requestAnimationFrame(animate);
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
