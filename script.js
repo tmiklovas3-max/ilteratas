@@ -7,7 +7,7 @@ const response = await fetch("data.csv");
 const text = await response.text();
 const rows = text.split("\n");
 
-// headeriai
+// headers
 const headers = rows[0].split(",");
 
 const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
@@ -16,7 +16,7 @@ const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes(
 const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
 const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
-// vardai
+// names
 let names = [];
 
 for (let i = 1; i < rows.length; i++) {
@@ -49,7 +49,6 @@ loop.forEach(name => {
   container.appendChild(div);
 });
 
-// config
 const itemHeight = 90;
 const visibleCenter = 180;
 
@@ -64,7 +63,7 @@ function spin() {
 
   const all = document.querySelectorAll(".name");
 
-  // surandam visas Angelės pozicijas
+  // find all Angelės
   let matches = [];
   for (let i = 0; i < all.length; i++) {
     if (all[i].innerText === winnerName) {
@@ -72,18 +71,15 @@ function spin() {
     }
   }
 
-  // imam vidurinę (geriausia UX)
+  // take middle one
   const targetIndex = matches[Math.floor(matches.length / 2)];
-
   const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-  // 👉 pradedam nuo dabartinės pozicijos
   let start = null;
-  const duration = 6000; // ilgiau sukasi
+  const duration = 6000;
 
-  // 👉 kiek suksis papildomai (scroll kiekis)
-  const startPos = 0;
-  const extraSpin = 3000; // kiek px „prasukti“ prieš sustojant
+  // 👉 dabartinė pozicija (labai svarbu!)
+  let currentY = 0;
 
   function animate(t) {
     if (!start) start = t;
@@ -91,11 +87,13 @@ function spin() {
     let progress = (t - start) / duration;
     if (progress > 1) progress = 1;
 
-    // ease out
     const ease = 1 - Math.pow(1 - progress, 3);
 
-    // 👉 nuo greito sukimo į tikslų sustojimą
-    const current = startPos + (extraSpin + finalPosition) * ease;
+    // 👉 sukimasis (pirmiausia daug sukasi, tada stoja)
+    const spinDistance = 3000;
+    const target = spinDistance + finalPosition;
+
+    const current = currentY + (target - currentY) * ease;
 
     container.style.transform = `translateY(-${current}px)`;
 
