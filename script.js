@@ -1,13 +1,13 @@
 window.onload = async function() {
   const container = document.getElementById("names");
 
-  // nuskaityti CSV
+  // CSV nuskaitymas
   const response = await fetch("data.csv");
   const text = await response.text();
 
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
-  // Funkcija teisingai padalina CSV eilutę su kabutėmis
+  // CSV eilutės parseris, kuris tvarkingai skiria stulpelius su kabutėmis
   function parseCSVLine(line) {
     const result = [];
     let cur = "";
@@ -32,25 +32,22 @@ window.onload = async function() {
 
   const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
   const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
-
   const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
   const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
+  // names array
   let names = [];
-
   for (let i = 1; i < rows.length; i++) {
     const cols = parseCSVLine(rows[i]);
-
     const n1 = cols[nameIndex];
     const s1 = cols[surnameIndex];
     const n2 = name2Index !== -1 ? cols[name2Index] : null;
     const s2 = surname2Index !== -1 ? cols[surname2Index] : null;
-
     if (n1 && s1) names.push(n1 + " " + s1);
     if (n2 && s2) names.push(n2 + " " + s2);
   }
 
-  // filter emails ir tuščius
+  // filter empty / emails
   names = names.filter(n => n && !n.includes("@") && n.trim().length > 1);
 
   if (names.length === 0) {
@@ -58,7 +55,7 @@ window.onload = async function() {
     return;
   }
 
-  // suformuojam ilgą sąrašą
+  // suformuojam ilgą sąrašą, kad suktųsi ratas
   let loop = [];
   for (let i = 0; i < 30; i++) loop = loop.concat(names);
 
@@ -76,12 +73,13 @@ window.onload = async function() {
     container.appendChild(div);
   });
 
-  container.style.height = "360px";
+  // container CSS
+  container.style.height = "360px"; // matysime 4 vardus vienu metu
   container.style.overflow = "hidden";
   container.style.position = "relative";
 
   const itemHeight = 90;
-  const visibleCenter = 180;
+  const visibleCenter = 180; // pusė container height
   let position = 0;
   let spinning = false;
   const winnerName = "Angelė Urbonaitė";
@@ -114,20 +112,21 @@ window.onload = async function() {
     container.style.transform = `translateY(0px)`;
     position = 0;
 
-    let speed = 40;
+    let speed = 40; // pradinis greitis
     const interval = setInterval(() => {
-      position += speed;
+      // lėtėjimas artėjant prie tikslo
+      const distance = finalPosition - position;
+      const slowFactor = Math.max(distance / 500, 0.05);
+      position += speed * slowFactor;
       container.style.transform = `translateY(-${position}px)`;
+      if (distance <= 2) {
+        clearInterval(interval);
+        container.style.transition = "transform 1.5s ease-out";
+        container.style.transform = `translateY(-${finalPosition}px)`;
+        document.getElementById("winner").innerText = "🎉 Laimėjo: " + winnerName;
+        spinning = false;
+      }
     }, 16);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      container.style.transition = "transform 2s ease-out";
-      container.style.transform = `translateY(-${finalPosition}px)`;
-      document.getElementById("winner").innerText = "🎉 Laimėjo: " + winnerName;
-      position = finalPosition;
-      spinning = false;
-    }, 5000);
   }
 
   document.getElementById("spinBtn").addEventListener("click", spin);
