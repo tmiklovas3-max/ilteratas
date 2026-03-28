@@ -5,25 +5,18 @@ window.onload = async function() {
   const response = await fetch("data.csv");
   const text = await response.text();
 
-  // Padalinti į eilutes ir išvalyti tarpus/naujus simbolius
+  // Padalinti į eilutes, išvalyti tarpus/newline
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
   // names array
   let names = [];
 
-  // Filtruojame tik vardus + pavardes
-  for (let i = 0; i < rows.length - 1; i++) {
-    const first = rows[i];
-    const second = rows[i + 1];
-
-    // jei eilutės atrodo kaip vardas + pavardė (tikros raidės, nėra @, nėra skaičių)
-    const combined = first + " " + second;
-    if (
-      !combined.includes("@") && 
-      combined.replace(/\s/g,'').match(/^[a-zA-ZĄČĘĖĮŠŲŪŽąčęėįšųūž\s]+$/)
-    ) {
-      names.push(combined);
-      i++; // praleidžiam kitą eilutę, nes jau paėmėme pavardę
+  // Kiekvienas įrašas – 5 eilutės: vardas, pavardė, profesija, sutikimas, email
+  for (let i = 0; i < rows.length - 1; i += 5) {
+    const n = rows[i];
+    const s = rows[i + 1];
+    if (n && s) {
+      names.push(n + " " + s);
     }
   }
 
