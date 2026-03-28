@@ -1,43 +1,44 @@
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-let segments = names.length;
 let angle = 0;
 
 function resize() {
-  canvas.width = Math.min(window.innerWidth, window.innerHeight) * 0.8;
-  canvas.height = canvas.width;
+  canvas.width = 500;
+  canvas.height = 500;
   draw(angle);
 }
 
-window.addEventListener("resize", resize);
 resize();
 
+const segments = names.length;
 const arc = 2 * Math.PI / segments;
 
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-  const radius = canvas.width / 2 - 10;
+  const radius = canvas.width / 2 - 20;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < segments; i++) {
+    // segmentas
     ctx.beginPath();
-    ctx.fillStyle = i % 2 ? "#ddd" : "#bbb";
+    ctx.fillStyle = i % 2 ? "#eee" : "#ccc";
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, radius, i * arc + rotation, (i + 1) * arc + rotation);
     ctx.fill();
 
-    // tekstas
+    // tekstas (FIX – dabar centre, ne už ribų)
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(i * arc + arc / 2 + rotation);
-    ctx.fillStyle = "black";
-    ctx.font = `${Math.floor(radius / 14)}px Arial`;
 
-    const text = names[i];
-    ctx.fillText(text, radius - 120, 5);
+    ctx.fillStyle = "#000";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "right";
+
+    ctx.fillText(names[i], radius - 20, 5);
 
     ctx.restore();
   }
@@ -46,34 +47,27 @@ function draw(rotation = 0) {
   ctx.fillStyle = "red";
   ctx.beginPath();
   ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 15, 40);
-  ctx.lineTo(cx + 15, 40);
+  ctx.lineTo(cx - 10, 30);
+  ctx.lineTo(cx + 10, 30);
   ctx.fill();
 }
 
 draw();
 
 function spin() {
-  // SURANDAM "Angelė Urbonaitė"
   const targetName = "Angelė Urbonaitė";
   const targetIndex = names.indexOf(targetName);
 
-  if (targetIndex === -1) {
-    alert("Nerastas vardas!");
-    return;
-  }
-
-  // kampas į tą segmentą
   let targetAngle = (2 * Math.PI) - (targetIndex * arc) - arc / 2;
 
-  // daug apsisukimų (slot efektas)
-  let spins = 10;
+  let spins = 8;
   let final = spins * 2 * Math.PI + targetAngle;
 
   let start = null;
 
   function animate(t) {
     if (!start) start = t;
+
     let progress = (t - start) / 4000;
     if (progress > 1) progress = 1;
 
@@ -85,7 +79,7 @@ function spin() {
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      alert("Laimėjo: " + targetName + " 🎉");
+      alert("Laimėjo: " + targetName);
     }
   }
 
