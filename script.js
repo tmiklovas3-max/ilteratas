@@ -1,18 +1,15 @@
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-let angle = 0;
+canvas.width = 500;
+canvas.height = 500;
 
-function resize() {
-  canvas.width = 500;
-  canvas.height = 500;
-  draw(angle);
-}
+const namesList = window.names;
 
-resize();
-
-const segments = names.length;
+const segments = namesList.length;
 const arc = 2 * Math.PI / segments;
+
+let angle = 0;
 
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
@@ -29,16 +26,16 @@ function draw(rotation = 0) {
     ctx.arc(cx, cy, radius, i * arc + rotation, (i + 1) * arc + rotation);
     ctx.fill();
 
-    // tekstas (FIX – dabar centre, ne už ribų)
+    // tekstas (DIDELIS IR AIŠKUS)
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(i * arc + arc / 2 + rotation);
 
-    ctx.fillStyle = "#000";
-    ctx.font = "16px Arial";
+    ctx.fillStyle = "black";
+    ctx.font = "18px Arial";
     ctx.textAlign = "right";
 
-    ctx.fillText(names[i], radius - 20, 5);
+    ctx.fillText(namesList[i], radius - 30, 5);
 
     ctx.restore();
   }
@@ -56,7 +53,7 @@ draw();
 
 function spin() {
   const targetName = "Angelė Urbonaitė";
-  const targetIndex = names.indexOf(targetName);
+  const targetIndex = namesList.indexOf(targetName);
 
   let targetAngle = (2 * Math.PI) - (targetIndex * arc) - arc / 2;
 
