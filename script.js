@@ -52,6 +52,7 @@ loop.forEach(name => {
 const itemHeight = 90;
 const visibleCenter = 180;
 
+let position = 0;
 let spinning = false;
 
 // 🎯 winner
@@ -63,7 +64,7 @@ function spin() {
 
   const all = document.querySelectorAll(".name");
 
-  // find all Angelės
+  // surandam Angelę arčiau vidurio
   let matches = [];
   for (let i = 0; i < all.length; i++) {
     if (all[i].innerText === winnerName) {
@@ -71,45 +72,30 @@ function spin() {
     }
   }
 
-  // take middle one
   const targetIndex = matches[Math.floor(matches.length / 2)];
   const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-  let start = null;
-  const duration = 6000;
+  let speed = 40;
 
-  // 👉 dabartinė pozicija (labai svarbu!)
-  let currentY = 0;
+  const interval = setInterval(() => {
+    position += speed;
+    container.style.transform = `translateY(-${position}px)`;
+  }, 16);
 
-  function animate(t) {
-    if (!start) start = t;
+  // 👉 ilgiau sukasi
+  setTimeout(() => {
+    clearInterval(interval);
 
-    let progress = (t - start) / duration;
-    if (progress > 1) progress = 1;
+    // 👉 smooth stop
+    container.style.transition = "transform 2s ease-out";
+    container.style.transform = `translateY(-${finalPosition}px)`;
 
-    const ease = 1 - Math.pow(1 - progress, 3);
+    document.getElementById("winner").innerText =
+      "🎉 Laimėjo: " + winnerName;
 
-    // 👉 sukimasis (pirmiausia daug sukasi, tada stoja)
-    const spinDistance = 3000;
-    const target = spinDistance + finalPosition;
+    spinning = false;
 
-    const current = currentY + (target - currentY) * ease;
-
-    container.style.transform = `translateY(-${current}px)`;
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      container.style.transform = `translateY(-${finalPosition}px)`;
-
-      document.getElementById("winner").innerText =
-        "🎉 Laimėjo: " + winnerName;
-
-      spinning = false;
-    }
-  }
-
-  requestAnimationFrame(animate);
+  }, 4000); // čia reguliuoji kiek sukasi
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
