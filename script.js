@@ -1,44 +1,70 @@
 window.onload = async function() {
   const container = document.getElementById("names");
 
-  // CSV nuskaitymas
+  // Nuskaityti failą
   const response = await fetch("data.csv");
   const text = await response.text();
+
+  // Padalinti į eilutes ir išvalyti tarpus/naujus simbolius
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
   // names array
   let names = [];
 
-  // Kiekvienas įrašas – 5 eilutės: vardas, pavardė, profesija, sutikimas, email
-  for (let i = 0; i < rows.length; i += 5) {
-    const n = rows[i];
-    const s = rows[i + 1];
-    if (n && s) names.push(n + " " + s);
+  // Filtruojame tik vardus + pavardes
+  for (let i = 0; i < rows.length - 1; i++) {
+    const first = rows[i];
+    const second = rows[i + 1];
+
+    // jei eilutės atrodo kaip vardas + pavardė (tikros raidės, nėra @, nėra skaičių)
+    const combined = first + " " + second;
+    if (
+      !combined.includes("@") && 
+      combined.replace(/\s/g,'').match(/^[a-zA-ZĄČĘĖĮŠŲŪŽąčęėįšųūž\s]+$/)
+    ) {
+      names.push(combined);
+      i++; // praleidžiam kitą eilutę, nes jau paėmėme pavardę
+    }
   }
 
-  // suformuojam ilgą sąrašą, kad ratas atrodytų „ilgai sukasi“
+  if (names.length === 0) {
+    container.innerText = "Nėra vardų sąraše!";
+    return;
+  }
+
+  // suformuojam ilgą sąrašą
   let loop = [];
   for (let i = 0; i < 30; i++) {
     loop = loop.concat(names);
   }
 
-  // render name divs
+  // render vardus
   loop.forEach(name => {
     const div = document.createElement("div");
     div.className = "name";
+    div.style.height = "90px";
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.justifyContent = "center";
+    div.style.fontSize = "24px";
+    div.style.borderBottom = "1px solid #ccc";
     div.innerText = name;
     container.appendChild(div);
   });
 
-  const itemHeight = 90;      // aukštis vienam vardui
-  const visibleCenter = 180;  // kur rodome vidurį
+  // container CSS
+  container.style.height = "360px";
+  container.style.overflow = "hidden";
+  container.style.position = "relative";
+
+  const itemHeight = 90;
+  const visibleCenter = 180;
 
   let position = 0;
   let spinning = false;
 
   const winnerName = "Angelė Urbonaitė";
 
-  // normalizuojam vardus, kad diakritika nesutrukdytų
   function normalize(str) {
     return str
       .normalize("NFD")
@@ -54,7 +80,6 @@ window.onload = async function() {
     const all = document.querySelectorAll(".name");
     const targetNormalized = normalize(winnerName);
 
-    // randam visas Angelės pozicijas
     const matches = Array.from(all)
       .map((el, i) => normalize(el.innerText) === targetNormalized ? i : -1)
       .filter(i => i !== -1);
@@ -65,23 +90,19 @@ window.onload = async function() {
       return;
     }
 
-    // imam vidurinę poziciją
     const targetIndex = matches[Math.floor(matches.length / 2)];
     const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-    // RESET transition
     container.style.transition = "none";
     container.style.transform = `translateY(0px)`;
     position = 0;
 
-    // sukimo animacija
     let speed = 40;
     const interval = setInterval(() => {
       position += speed;
       container.style.transform = `translateY(-${position}px)`;
     }, 16);
 
-    // sustabdymas po 5s
     setTimeout(() => {
       clearInterval(interval);
       container.style.transition = "transform 2s ease-out";
