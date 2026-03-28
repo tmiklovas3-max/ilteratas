@@ -1,32 +1,6 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2868
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
-
-\f0\fs24 \cf0 html, body \{\
-  margin: 0;\
-  padding: 0;\
-  width: 100%;\
-  height: 100%;\
-  display: flex;\
-  flex-direction: column;\
-  justify-content: center;\
-  align-items: center;\
-  background: #f0f0f0;\
-  overflow: hidden;\
-\}\
-\
-canvas \{\
-  display: block;\
-  max-width: 90%;\
-  max-height: 80%;\
-\}\
-\
-button \{\
-  margin-top: 20px;\
-  padding: 10px 20px;\
-  font-size: 20px;\
-  cursor: pointer;\
-\}}
+canvas {
+  width: 400px;
+  height: 400px;
+  border: 5px solid #333;
+  border-radius: 50%;
+}
