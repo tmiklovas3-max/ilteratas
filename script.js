@@ -4,24 +4,20 @@ window.onload = async function() {
   // CSV nuskaitymas
   const response = await fetch("data.csv");
   const text = await response.text();
-
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
-  // CSV eilutės parseris, kuris tvarkingai skiria stulpelius su kabutėmis
+  // CSV parseris su kabutėmis
   function parseCSVLine(line) {
     const result = [];
     let cur = "";
     let inQuotes = false;
     for (let i = 0; i < line.length; i++) {
       const c = line[i];
-      if (c === '"') {
-        inQuotes = !inQuotes;
-      } else if (c === "," && !inQuotes) {
+      if (c === '"') inQuotes = !inQuotes;
+      else if (c === "," && !inQuotes) {
         result.push(cur);
         cur = "";
-      } else {
-        cur += c;
-      }
+      } else cur += c;
     }
     result.push(cur);
     return result.map(s => s.trim());
@@ -29,7 +25,6 @@ window.onload = async function() {
 
   // headers
   const headers = parseCSVLine(rows[0]);
-
   const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
   const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
   const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
@@ -47,7 +42,6 @@ window.onload = async function() {
     if (n2 && s2) names.push(n2 + " " + s2);
   }
 
-  // filter empty / emails
   names = names.filter(n => n && !n.includes("@") && n.trim().length > 1);
 
   if (names.length === 0) {
@@ -55,7 +49,7 @@ window.onload = async function() {
     return;
   }
 
-  // suformuojam ilgą sąrašą, kad suktųsi ratas
+  // ilgai sąrašas sukimuisi
   let loop = [];
   for (let i = 0; i < 30; i++) loop = loop.concat(names);
 
@@ -73,16 +67,14 @@ window.onload = async function() {
     container.appendChild(div);
   });
 
-  // container CSS
-  container.style.height = "360px"; // matysime 4 vardus vienu metu
+  container.style.height = "360px";
   container.style.overflow = "hidden";
   container.style.position = "relative";
 
   const itemHeight = 90;
-  const visibleCenter = 180; // pusė container height
-  let position = 0;
-  let spinning = false;
+  const visibleCenter = 180;
   const winnerName = "Angelė Urbonaitė";
+  let spinning = false;
 
   function normalize(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
@@ -96,37 +88,40 @@ window.onload = async function() {
     const targetNormalized = normalize(winnerName);
 
     const matches = Array.from(all)
-      .map((el, i) => normalize(el.innerText) === targetNormalized ? i : -1)
-      .filter(i => i !== -1);
+      .map((el,i) => normalize(el.innerText)===targetNormalized ? i : -1)
+      .filter(i=>i!==-1);
 
-    if (matches.length === 0) {
-      alert("Angelė Urbonaitė nerasta sąraše!");
-      spinning = false;
+    if(matches.length===0){
+      alert("Angelė Urbonaitė nerasta!");
+      spinning=false;
       return;
     }
 
-    const targetIndex = matches[Math.floor(matches.length / 2)];
-    const finalPosition = targetIndex * itemHeight - visibleCenter;
+    const targetIndex = matches[Math.floor(matches.length/2)];
+    const finalPosition = targetIndex*itemHeight - visibleCenter;
 
-    container.style.transition = "none";
-    container.style.transform = `translateY(0px)`;
-    position = 0;
+    let position = 0;
+    let speed = 20; // pradinis greitis
 
-    let speed = 40; // pradinis greitis
-    const interval = setInterval(() => {
-      // lėtėjimas artėjant prie tikslo
+    function animate() {
+      // artėjant prie tikslo, lėtiname
       const distance = finalPosition - position;
-      const slowFactor = Math.max(distance / 500, 0.05);
-      position += speed * slowFactor;
+      const deceleration = 0.05; // lėtėjimo faktorius
+      speed = Math.max(distance * deceleration, 1);
+      position += speed;
+
       container.style.transform = `translateY(-${position}px)`;
-      if (distance <= 2) {
-        clearInterval(interval);
-        container.style.transition = "transform 1.5s ease-out";
+
+      if(distance>1){
+        requestAnimationFrame(animate);
+      } else {
         container.style.transform = `translateY(-${finalPosition}px)`;
         document.getElementById("winner").innerText = "🎉 Laimėjo: " + winnerName;
-        spinning = false;
+        spinning=false;
       }
-    }, 16);
+    }
+
+    requestAnimationFrame(animate);
   }
 
   document.getElementById("spinBtn").addEventListener("click", spin);
