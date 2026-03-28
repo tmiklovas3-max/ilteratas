@@ -1,69 +1,36 @@
-window.onload = function() {
+window.onload = async function() {
 
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-// 👉 VISI vardai (iš tavo CSV)
-const segments = [
-"Tomas Miklovas",
-"Juozas Vaiciunas",
-"Rasa Dayjotienė",
-"Monika Daine",
-"Aida Mazikaite",
-"Erikas Blynovas",
-"Donatas Skubrys",
-"Kristina Rainienė",
-"Akvilė Kulikauskaitė",
-"Jonas Jonaitis",
-"Ona Onaite",
-"Petras Petraitis",
-"Lukas Kazlauskas",
-"Marius Jankauskas",
-"Asta Petrauskiene",
-"Rokas Vaitkus",
-"Egle Sabaliauskaite",
-"Karolis Stankevicius",
-"Simona Paulauskaite",
-"Tadas Urbonas",
-"Gintare Zukauskaite",
-"Paulius Mockus",
-"Inga Balciunaite",
-"Mindaugas Grigas",
-"Edita Vasiliauskaite",
-"Deividas Petrauskas",
-"Viktorija Navickaite",
-"Arturas Kazlauskas",
-"Raimonda Jankauskiene",
-"Justas Bielskis",
-"Ieva Petrauskaite",
-"Arnas Vaitkus",
-"Kotryna Stankeviciute",
-"Saulius Kazlauskas",
-"Neringa Paulauskaite",
-"Vytautas Mockus",
-"Jolanta Balciuniene",
-"Antanas Grigas",
-"Laura Vasiliauskaite",
-"Darius Petrauskas",
-"Lina Navickaite",
-"Mantas Kazlauskas",
-"Rasa Jankauskiene",
-"Domantas Bielskis",
-"Aiste Petrauskaite",
-"Gabrielius Vaitkus",
-"Ugne Stankeviciute",
-"Algirdas Kazlauskas",
-"Sigita Paulauskaite",
-"Rolandas Mockus",
-"Daiva Balciuniene",
-"Kestutis Grigas",
-"Zivile Vasiliauskaite",
-"Saulius Petrauskas",
-"Ramune Navickaite",
+// 👉 nuskaitom CSV
+const response = await fetch("data.csv");
+const text = await response.text();
 
-// 👉 SVARBUS – LAIMĖTOJAS
-"Angelė Urbonaitė"
-];
+const rows = text.split("\n");
+
+// 👉 ištraukiam vardus
+let segments = [];
+
+for (let i = 1; i < rows.length; i++) {
+  const cols = rows[i].split(",");
+
+  if (cols[2] && cols[3]) {
+    segments.push(cols[2] + " " + cols[3]);
+  }
+
+  if (cols[7] && cols[8]) {
+    segments.push(cols[7] + " " + cols[8]);
+  }
+}
+
+// 👉 pašalinam tuščius
+segments = segments.filter(x => x && x.length > 3);
+
+
+// 👉 LAIMĖTOJAS
+const winnerName = "Angelė Urbonaitė";
+const winnerIndex = segments.indexOf(winnerName);
 
 let angle = 0;
 let spinning = false;
@@ -93,7 +60,7 @@ function draw(rotation = 0) {
     ctx.rotate(start + arc / 2);
 
     ctx.fillStyle = "white";
-    ctx.font = `${Math.max(8, 250 / segments.length)}px Arial`;
+    ctx.font = `${Math.max(6, 200 / segments.length)}px Arial`;
     ctx.textAlign = "right";
 
     ctx.fillText(segments[i], radius - 10, 5);
@@ -108,10 +75,6 @@ function draw(rotation = 0) {
   ctx.lineTo(cx + 20, 60);
   ctx.fill();
 }
-
-// 🎯 surandam Angelę
-const winnerName = "Angelė Urbonaitė";
-const winnerIndex = segments.indexOf(winnerName);
 
 function spin() {
   if (spinning) return;
