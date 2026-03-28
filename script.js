@@ -1,24 +1,38 @@
 window.onload = async function() {
   const container = document.getElementById("names");
 
-  // Nuskaityti failą
+  // CSV nuskaitymas
   const response = await fetch("data.csv");
   const text = await response.text();
 
-  // Padalinti į eilutes, išvalyti tarpus/newline
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
+
+  // headers
+  const headers = rows[0].replace(/"/g,'').split(",");
+
+  const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
+  const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
+
+  const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
+  const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
   // names array
   let names = [];
 
-  // Kiekvienas įrašas – 5 eilutės: vardas, pavardė, profesija, sutikimas, email
-  for (let i = 0; i < rows.length - 1; i += 5) {
-    const n = rows[i];
-    const s = rows[i + 1];
-    if (n && s) {
-      names.push(n + " " + s);
-    }
+  for (let i = 1; i < rows.length; i++) {
+    const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g,'').trim());
+
+    const n1 = cols[nameIndex];
+    const s1 = cols[surnameIndex];
+    const n2 = name2Index !== -1 ? cols[name2Index] : null;
+    const s2 = surname2Index !== -1 ? cols[surname2Index] : null;
+
+    if (n1 && s1) names.push(n1 + " " + s1);
+    if (n2 && s2) names.push(n2 + " " + s2);
   }
+
+  // filter empty / emails
+  names = names.filter(n => n && !n.includes("@") && n.length > 3);
 
   if (names.length === 0) {
     container.innerText = "Nėra vardų sąraše!";
@@ -45,25 +59,18 @@ window.onload = async function() {
     container.appendChild(div);
   });
 
-  // container CSS
   container.style.height = "360px";
   container.style.overflow = "hidden";
   container.style.position = "relative";
 
   const itemHeight = 90;
   const visibleCenter = 180;
-
   let position = 0;
   let spinning = false;
-
   const winnerName = "Angelė Urbonaitė";
 
   function normalize(str) {
-    return str
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim()
-      .toLowerCase();
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
   }
 
   function spin() {
