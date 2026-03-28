@@ -1,62 +1,28 @@
 window.onload = async function() {
   const container = document.getElementById("names");
 
-  // CSV
+  // CSV nuskaitymas
   const response = await fetch("data.csv");
   const text = await response.text();
-  const rows = text.split("\n");
+  const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
-  // headers
-  const headers = rows[0].split(",");
-
-  const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
-  const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
-
-  const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
-  const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
-awindow.onload = async function() {
-  const container = document.getElementById("names");
-
-  // CSV
-  const response = await fetch("data.csv");
-  const text = await response.text();
-  const rows = text.split("\n");
-
-  // headers
-  const headers = rows[0].split(",");
-
-  const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
-  const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
-
-  const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
-  const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
-
-  // names
+  // names array
   let names = [];
 
-  for (let i = 1; i < rows.length; i++) {
-    const cols = rows[i].split(",");
-
-    const n1 = cols[nameIndex]?.replace(/\r|\n/g, '').trim();
-    const s1 = cols[surnameIndex]?.replace(/\r|\n/g, '').trim();
-
-    const n2 = cols[name2Index]?.replace(/\r|\n/g, '').trim();
-    const s2 = cols[surname2Index]?.replace(/\r|\n/g, '').trim();
-
-    if (n1 && s1) names.push(n1 + " " + s1);
-    if (n2 && s2) names.push(n2 + " " + s2);
+  // Kiekvienas įrašas – 5 eilutės: vardas, pavardė, profesija, sutikimas, email
+  for (let i = 0; i < rows.length; i += 5) {
+    const n = rows[i];
+    const s = rows[i + 1];
+    if (n && s) names.push(n + " " + s);
   }
 
-  // cleanup
-  names = names.filter(n => n && !n.includes("@") && n.length > 3);
-
-  // sukuriam ilgą listą
+  // suformuojam ilgą sąrašą, kad ratas atrodytų „ilgai sukasi“
   let loop = [];
   for (let i = 0; i < 30; i++) {
     loop = loop.concat(names);
   }
 
-  // render
+  // render name divs
   loop.forEach(name => {
     const div = document.createElement("div");
     div.className = "name";
@@ -64,21 +30,19 @@ awindow.onload = async function() {
     container.appendChild(div);
   });
 
-  const itemHeight = 90;
-  const visibleCenter = 180;
+  const itemHeight = 90;      // aukštis vienam vardui
+  const visibleCenter = 180;  // kur rodome vidurį
 
   let position = 0;
   let spinning = false;
 
-  // 🎯 winner
   const winnerName = "Angelė Urbonaitė";
 
-  // helper: normalizuojam tekstą (diakritikai -> paprastos raidės)
+  // normalizuojam vardus, kad diakritika nesutrukdytų
   function normalize(str) {
     return str
-      .normalize("NFD")                       // atskiria diakritiką
-      .replace(/[\u0300-\u036f]/g, "")        // pašalina diakritiką
-      .replace(/\r|\n/g, '')                  // pašalina newline
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .trim()
       .toLowerCase();
   }
@@ -88,7 +52,6 @@ awindow.onload = async function() {
     spinning = true;
 
     const all = document.querySelectorAll(".name");
-
     const targetNormalized = normalize(winnerName);
 
     // randam visas Angelės pozicijas
@@ -111,107 +74,7 @@ awindow.onload = async function() {
     container.style.transform = `translateY(0px)`;
     position = 0;
 
-    // 🌀 animacija
-    let speed = 40;
-    const interval = setInterval(() => {
-      position += speed;
-      container.style.transform = `translateY(-${position}px)`;
-    }, 16);
-
-    // sustabdymas po 5s
-    setTimeout(() => {
-      clearInterval(interval);
-      container.style.transition = "transform 2s ease-out";
-      container.style.transform = `translateY(-${finalPosition}px)`;
-      document.getElementById("winner").innerText = "🎉 Laimėjo: " + winnerName;
-      position = finalPosition;
-      spinning = false;
-    }, 5000);
-  }
-
-  document.getElementById("spinBtn").addEventListener("click", spin);
-};
-  // names
-  let names = [];
-
-  for (let i = 1; i < rows.length; i++) {
-    const cols = rows[i].split(",");
-
-    const n1 = cols[nameIndex]?.replace(/\r|\n/g, '').trim();
-    const s1 = cols[surnameIndex]?.replace(/\r|\n/g, '').trim();
-
-    const n2 = cols[name2Index]?.replace(/\r|\n/g, '').trim();
-    const s2 = cols[surname2Index]?.replace(/\r|\n/g, '').trim();
-
-    if (n1 && s1) names.push(n1 + " " + s1);
-    if (n2 && s2) names.push(n2 + " " + s2);
-  }
-
-  // cleanup
-  names = names.filter(n => n && !n.includes("@") && n.length > 3);
-
-  // sukuriam ilgą listą
-  let loop = [];
-  for (let i = 0; i < 30; i++) {
-    loop = loop.concat(names);
-  }
-
-  // render
-  loop.forEach(name => {
-    const div = document.createElement("div");
-    div.className = "name";
-    div.innerText = name;
-    container.appendChild(div);
-  });
-
-  const itemHeight = 90;
-  const visibleCenter = 180;
-
-  let position = 0;
-  let spinning = false;
-
-  // 🎯 winner
-  const winnerName = "Angelė Urbonaitė";
-
-  // helper: normalizuojam tekstą (diakritikai -> paprastos raidės)
-  function normalize(str) {
-    return str
-      .normalize("NFD")                       // atskiria diakritiką
-      .replace(/[\u0300-\u036f]/g, "")        // pašalina diakritiką
-      .replace(/\r|\n/g, '')                  // pašalina newline
-      .trim()
-      .toLowerCase();
-  }
-
-  function spin() {
-    if (spinning) return;
-    spinning = true;
-
-    const all = document.querySelectorAll(".name");
-
-    const targetNormalized = normalize(winnerName);
-
-    // randam visas Angelės pozicijas
-    const matches = Array.from(all)
-      .map((el, i) => normalize(el.innerText) === targetNormalized ? i : -1)
-      .filter(i => i !== -1);
-
-    if (matches.length === 0) {
-      alert("Angelė Urbonaitė nerasta sąraše!");
-      spinning = false;
-      return;
-    }
-
-    // imam vidurinę poziciją
-    const targetIndex = matches[Math.floor(matches.length / 2)];
-    const finalPosition = targetIndex * itemHeight - visibleCenter;
-
-    // RESET transition
-    container.style.transition = "none";
-    container.style.transform = `translateY(0px)`;
-    position = 0;
-
-    // 🌀 animacija
+    // sukimo animacija
     let speed = 40;
     const interval = setInterval(() => {
       position += speed;
