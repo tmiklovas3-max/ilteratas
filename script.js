@@ -3,7 +3,7 @@ window.onload = function() {
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-// 👉 VISI VARDai (sutrumpinau dubliavimus automatiškai)
+// 👉 VISI vardai (iš tavo CSV)
 const segments = [
 "Tomas Miklovas",
 "Juozas Vaiciunas",
@@ -59,14 +59,17 @@ const segments = [
 "Kestutis Grigas",
 "Zivile Vasiliauskaite",
 "Saulius Petrauskas",
-"Ramune Navickaite"
+"Ramune Navickaite",
+
+// 👉 SVARBUS – LAIMĖTOJAS
+"Angelė Urbonaitė"
 ];
 
 let angle = 0;
 let spinning = false;
 
-canvas.width = 500;
-canvas.height = 500;
+canvas.width = 600;
+canvas.height = 600;
 
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
@@ -90,7 +93,7 @@ function draw(rotation = 0) {
     ctx.rotate(start + arc / 2);
 
     ctx.fillStyle = "white";
-    ctx.font = `${Math.max(8, 200 / segments.length)}px Arial`;
+    ctx.font = `${Math.max(8, 250 / segments.length)}px Arial`;
     ctx.textAlign = "right";
 
     ctx.fillText(segments[i], radius - 10, 5);
@@ -101,23 +104,25 @@ function draw(rotation = 0) {
   ctx.fillStyle = "#FF3D00";
   ctx.beginPath();
   ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 20, 50);
-  ctx.lineTo(cx + 20, 50);
+  ctx.lineTo(cx - 20, 60);
+  ctx.lineTo(cx + 20, 60);
   ctx.fill();
 }
 
-function getWinner() {
-  const arc = (2 * Math.PI) / segments.length;
-  const index = Math.floor((2 * Math.PI - (angle % (2 * Math.PI))) / arc) % segments.length;
-  return segments[index];
-}
+// 🎯 surandam Angelę
+const winnerName = "Angelė Urbonaitė";
+const winnerIndex = segments.indexOf(winnerName);
 
 function spin() {
   if (spinning) return;
   spinning = true;
 
-  const randomSpins = Math.floor(Math.random() * 5) + 6;
-  const final = randomSpins * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  const arc = (2 * Math.PI) / segments.length;
+
+  const targetAngle = (2 * Math.PI) - (winnerIndex * arc) - arc / 2;
+
+  const spins = 8;
+  const final = spins * 2 * Math.PI + targetAngle;
 
   let start = null;
 
@@ -135,7 +140,7 @@ function spin() {
       requestAnimationFrame(animate);
     } else {
       spinning = false;
-      alert("🎉 Laimėjo: " + getWinner());
+      alert("🎉 Laimėjo: " + winnerName);
     }
   }
 
