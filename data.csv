@@ -1,3 +1,4 @@
+alert(names);
 const names = [
   "Jonas Jonaitis",
   "Petras Petraitis",
