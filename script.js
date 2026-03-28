@@ -1,95 +1,97 @@
-const canvas = document.getElementById("wheel");
-const ctx = canvas.getContext("2d");
+window.onload = function() {
 
-// TEST vardai (vėliau pakeisim į tavo CSV)
-const segments = [
-  "Tomas",
-  "Jonas",
-  "Petras",
-  "Ona",
-  "Asta",
-  "Marius",
-  "Rasa",
-  "Lukas"
-];
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
 
-let angle = 0;
-let spinning = false;
+  const segments = [
+    "Tomas",
+    "Jonas",
+    "Petras",
+    "Ona",
+    "Asta",
+    "Marius",
+    "Rasa",
+    "Lukas"
+  ];
 
-canvas.width = 400;
-canvas.height = 400;
+  let angle = 0;
+  let spinning = false;
 
-function draw(rotation = 0) {
-  const cx = 200;
-  const cy = 200;
-  const radius = 180;
-  const arc = (2 * Math.PI) / segments.length;
+  canvas.width = 400;
+  canvas.height = 400;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function draw(rotation = 0) {
+    const cx = 200;
+    const cy = 200;
+    const radius = 180;
+    const arc = (2 * Math.PI) / segments.length;
 
-  for (let i = 0; i < segments.length; i++) {
-    const start = i * arc + rotation;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, start, start + arc);
-    ctx.fillStyle = i % 2 ? "#0F4C81" : "#00A6A6";
-    ctx.fill();
+    for (let i = 0; i < segments.length; i++) {
+      const start = i * arc + rotation;
 
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(start + arc / 2);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, radius, start, start + arc);
+      ctx.fillStyle = i % 2 ? "#0F4C81" : "#00A6A6";
+      ctx.fill();
 
-    ctx.fillStyle = "white";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "right";
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(start + arc / 2);
 
-    ctx.fillText(segments[i], radius - 10, 5);
-    ctx.restore();
-  }
+      ctx.fillStyle = "white";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "right";
 
-  // rodyklė
-  ctx.fillStyle = "red";
-  ctx.beginPath();
-  ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 15, 40);
-  ctx.lineTo(cx + 15, 40);
-  ctx.fill();
-}
-
-draw();
-
-function spin() {
-  if (spinning) return;
-  spinning = true;
-
-  const winnerIndex = Math.floor(Math.random() * segments.length);
-  const arc = (2 * Math.PI) / segments.length;
-
-  const targetAngle = (2 * Math.PI) - (winnerIndex * arc) - arc/2;
-  const final = 6 * 2 * Math.PI + targetAngle;
-
-  let start = null;
-
-  function animate(t) {
-    if (!start) start = t;
-    let progress = (t - start) / 3000;
-    if (progress > 1) progress = 1;
-
-    let ease = 1 - Math.pow(1 - progress, 3);
-    angle = final * ease;
-
-    draw(angle);
-
-    if (progress < 1) {
-      requestAnimationFrame(animate);
-    } else {
-      spinning = false;
-      alert("Laimėjo: " + segments[winnerIndex]);
+      ctx.fillText(segments[i], radius - 10, 5);
+      ctx.restore();
     }
+
+    // rodyklė
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.moveTo(cx, 10);
+    ctx.lineTo(cx - 15, 40);
+    ctx.lineTo(cx + 15, 40);
+    ctx.fill();
   }
 
-  requestAnimationFrame(animate);
-}
+  function spin() {
+    if (spinning) return;
+    spinning = true;
 
-document.getElementById("spinBtn").addEventListener("click", spin);
+    const winnerIndex = Math.floor(Math.random() * segments.length);
+    const arc = (2 * Math.PI) / segments.length;
+
+    const targetAngle = (2 * Math.PI) - (winnerIndex * arc) - arc/2;
+    const final = 6 * 2 * Math.PI + targetAngle;
+
+    let start = null;
+
+    function animate(t) {
+      if (!start) start = t;
+      let progress = (t - start) / 3000;
+      if (progress > 1) progress = 1;
+
+      let ease = 1 - Math.pow(1 - progress, 3);
+      angle = final * ease;
+
+      draw(angle);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        spinning = false;
+        alert("Laimėjo: " + segments[winnerIndex]);
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  draw();
+  document.getElementById("spinBtn").addEventListener("click", spin);
+
+};
