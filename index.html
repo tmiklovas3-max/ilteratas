@@ -27,6 +27,18 @@ body {
   position: relative;
 }
 
+#slot::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 2px solid gold;
+  border-bottom: 2px solid gold;
+  pointer-events: none;
+}
+
 #list {
   position: absolute;
   width: 100%;
@@ -37,7 +49,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
+  color: #ccc;
 }
 
 button {
@@ -69,11 +82,11 @@ const names = [
   "Mantas Stankevičius"
 ];
 
-// 🔁 padauginam sąrašą kad būtų ilgas scroll
 const list = document.getElementById("list");
 
+// 🔁 padarom ilgą sąrašą (kad suktųsi gražiai)
 let bigList = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 30; i++) {
   bigList = bigList.concat(names);
 }
 
@@ -85,23 +98,19 @@ bigList.forEach(name => {
   list.appendChild(div);
 });
 
-let position = 0;
-
 function spin() {
   const target = "Angelė Urbonaitė";
 
-  // randam target indeksą originaliam sąraše
   const targetIndex = names.indexOf(target);
 
-  // pasirenkam kažkurią kopiją sąraše (kad atrodytų random)
-  const cycles = 15;
+  const cycles = 25; // kiek kartų "apsisuka"
   const finalIndex = targetIndex + (names.length * cycles);
 
   const itemHeight = 80;
   const finalPosition = finalIndex * itemHeight;
 
   let start = null;
-  const duration = 4000;
+  const duration = 6500; // ilgis (ms)
 
   function animate(t) {
     if (!start) start = t;
@@ -109,23 +118,41 @@ function spin() {
     let progress = (t - start) / duration;
     if (progress > 1) progress = 1;
 
-    // easing
-    let ease = 1 - Math.pow(1 - progress, 3);
+    let ease = 1 - Math.pow(1 - progress, 4);
 
-    position = finalPosition * ease;
+    const position = finalPosition * ease;
 
     list.style.transform = `translateY(-${position}px)`;
 
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      alert("Laimėjo: " + target);
+      highlightWinner(position);
     }
   }
 
   requestAnimationFrame(animate);
 }
+
+function highlightWinner(position) {
+  const itemHeight = 80;
+  const items = document.querySelectorAll(".item");
+
+  items.forEach(el => {
+    el.style.color = "#777";
+    el.style.fontWeight = "normal";
+    el.style.fontSize = "22px";
+  });
+
+  const index = Math.round(position / itemHeight);
+
+  if (items[index]) {
+    items[index].style.color = "gold";
+    items[index].style.fontWeight = "bold";
+    items[index].style.fontSize = "28px";
+  }
+}
 </script>
 
 </body>
-</html>
+</html> 
