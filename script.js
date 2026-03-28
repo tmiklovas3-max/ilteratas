@@ -1,6 +1,7 @@
 window.onload = async function() {
 
 const container = document.getElementById("names");
+const slot = document.getElementById("slot");
 
 // CSV
 const response = await fetch("data.csv");
@@ -35,13 +36,14 @@ for (let i = 1; i < rows.length; i++) {
 // cleanup
 names = names.filter(n => n && !n.includes("@") && n.length > 3);
 
-// 👉 sukuriam ilgą listą
+// loop (daug kartų kad gražiai suktųsi)
 let loop = [];
 for (let i = 0; i < 30; i++) {
   loop = loop.concat(names);
 }
 
 // render
+container.innerHTML = "";
 loop.forEach(name => {
   const div = document.createElement("div");
   div.className = "name";
@@ -49,10 +51,12 @@ loop.forEach(name => {
   container.appendChild(div);
 });
 
-const itemHeight = 90;
-const visibleCenter = 180;
+// 👉 REALUS aukštis (FIX bug)
+const firstItem = document.querySelector(".name");
+const itemHeight = firstItem.offsetHeight;
 
-let position = 0;
+const visibleCenter = slot.offsetHeight / 2;
+
 let spinning = false;
 
 // 🎯 winner
@@ -64,7 +68,7 @@ function spin() {
 
   const all = document.querySelectorAll(".name");
 
-  // 👉 randam visas Angelės pozicijas
+  // randam visas Angelės pozicijas
   let matches = [];
   for (let i = 0; i < all.length; i++) {
     if (all[i].innerText === winnerName) {
@@ -72,15 +76,19 @@ function spin() {
     }
   }
 
-  // imam vidurinę
+  // imam tą, kuri per vidurį
   const targetIndex = matches[Math.floor(matches.length / 2)];
-  const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-  // 👉 RESET transition (labai svarbu)
+  const finalPosition =
+    targetIndex * itemHeight - visibleCenter + (itemHeight / 2);
+
+  // reset transition
   container.style.transition = "none";
 
+  let position = 0;
   let speed = 40;
 
+  // 👉 sukimas (MATOMAS)
   const interval = setInterval(() => {
     position += speed;
     container.style.transform = `translateY(-${position}px)`;
@@ -88,19 +96,19 @@ function spin() {
 
   // 👉 sustabdymas
   setTimeout(() => {
+
     clearInterval(interval);
 
-    // 👉 dabar tiksliai pastatom
     container.style.transition = "transform 2s ease-out";
     container.style.transform = `translateY(-${finalPosition}px)`;
 
     document.getElementById("winner").innerText =
       "🎉 Laimėjo: " + winnerName;
 
-    position = finalPosition;
     spinning = false;
 
-  }, 5000);
+  }, 5000); // 👈 reguliuok sukimą (pvz 6000, 7000)
+
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
