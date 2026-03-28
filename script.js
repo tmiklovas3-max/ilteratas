@@ -1,57 +1,78 @@
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-let segments = 100;
+// 👉 ČIA įdėk VISUS vardus (galiu įdėti pilną listą jei reikia)
+const segments = [
+"Tomas Miklovas",
+"Juozas Vaiciunas",
+"Rasa Dayjotienė",
+"Monika Daine",
+"Aida Mazikaite",
+"Erikas Blynovas",
+"Donatas Skubrys",
+"Kristina Rainienė",
+"Akvilė Kulikauskaitė"
+];
+
 let angle = 0;
+let spinning = false;
 
 function resize() {
-  canvas.width = Math.min(window.innerWidth, window.innerHeight) * 0.8;
+  canvas.width = Math.min(window.innerWidth, window.innerHeight) * 0.9;
   canvas.height = canvas.width;
-  draw(angle);
+  draw();
 }
-
 window.addEventListener("resize", resize);
 resize();
 
-const arc = 2 * Math.PI / segments;
+const arc = () => (2 * Math.PI) / segments.length;
 
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-  const radius = canvas.width / 2 - 10;
+  const radius = canvas.width / 2 - 20;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let i = 0; i < segments; i++) {
+  for (let i = 0; i < segments.length; i++) {
+    const start = i * arc() + rotation;
+    const end = start + arc();
+
     ctx.beginPath();
-    ctx.fillStyle = i % 2 ? "#ddd" : "#bbb";
+    ctx.fillStyle = i % 2 ? "#0F4C81" : "#00A6A6";
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, i*arc+rotation, (i+1)*arc+rotation);
+    ctx.arc(cx, cy, radius, start, end);
     ctx.fill();
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(i*arc + arc/2 + rotation);
-    ctx.fillStyle = "black";
-    ctx.font = `${Math.floor(radius/12)}px Arial`;
-    ctx.fillText(i+1, radius - 30, 5);
+    ctx.rotate(start + arc() / 2);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = `${Math.max(10, radius / segments.length * 4)}px Arial`;
+    ctx.textAlign = "right";
+
+    ctx.fillText(segments[i], radius - 10, 5);
     ctx.restore();
   }
 
-  ctx.fillStyle = "red";
+  // rodyklė
+  ctx.fillStyle = "#FF3D00";
   ctx.beginPath();
   ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 15, 40);
-  ctx.lineTo(cx + 15, 40);
+  ctx.lineTo(cx - 20, 50);
+  ctx.lineTo(cx + 20, 50);
   ctx.fill();
 }
 
-draw();
-
 function spin() {
-  let targetIndex = 19;
-  let targetAngle = (2*Math.PI) - (targetIndex * arc) - arc/2;
-  let final = 10 * 2*Math.PI + targetAngle;
+  if (spinning) return;
+  spinning = true;
+
+  const winnerIndex = Math.floor(Math.random() * segments.length);
+  const targetAngle = (2 * Math.PI) - (winnerIndex * arc()) - arc()/2;
+
+  const final = 8 * 2 * Math.PI + targetAngle;
 
   let start = null;
 
@@ -68,11 +89,17 @@ function spin() {
     if (progress < 1) {
       requestAnimationFrame(animate);
     } else {
-      alert("Laimėjai: 20 🎉");
+      spinning = false;
+      showWinner(winnerIndex);
     }
   }
 
   requestAnimationFrame(animate);
+}
+
+function showWinner(index) {
+  const winner = segments[index];
+  document.getElementById("winner").innerText = "🎉 " + winner;
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
