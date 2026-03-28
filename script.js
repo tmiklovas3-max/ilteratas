@@ -1,14 +1,13 @@
 window.onload = async function() {
 
 const container = document.getElementById("names");
-const slot = document.getElementById("slot");
 
-// 👉 nuskaitom CSV
+// CSV
 const response = await fetch("data.csv");
 const text = await response.text();
 const rows = text.split("\n");
 
-// 👉 randam stulpelius
+// headers
 const headers = rows[0].split(",");
 
 const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
@@ -17,7 +16,7 @@ const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes(
 const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
 const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
-// 👉 surenkam vardus
+// names
 let names = [];
 
 for (let i = 1; i < rows.length; i++) {
@@ -33,21 +32,16 @@ for (let i = 1; i < rows.length; i++) {
   if (n2 && s2) names.push(n2 + " " + s2);
 }
 
-// 👉 cleanup
-names = names.filter(n => 
-  n &&
-  !n.includes("@") &&
-  !n.includes("true") &&
-  n.length > 3
-);
+// cleanup
+names = names.filter(n => n && !n.includes("@") && n.length > 3);
 
-// 👉 padauginam listą (kad būtų ilgas scroll)
+// 👉 sukuriam ilgą listą
 let loop = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 30; i++) {
   loop = loop.concat(names);
 }
 
-// 👉 renderinam
+// render
 loop.forEach(name => {
   const div = document.createElement("div");
   div.className = "name";
@@ -55,10 +49,13 @@ loop.forEach(name => {
   container.appendChild(div);
 });
 
+const itemHeight = 90;
+const visibleCenter = 180;
+
 let position = 0;
 let spinning = false;
 
-// 🎯 LAIMĖTOJAS
+// 🎯 winner
 const winnerName = "Angelė Urbonaitė";
 
 function spin() {
@@ -67,7 +64,7 @@ function spin() {
 
   const all = document.querySelectorAll(".name");
 
-  // 👉 randam visas Angelės vietas
+  // 👉 randam visas Angelės pozicijas
   let matches = [];
   for (let i = 0; i < all.length; i++) {
     if (all[i].innerText === winnerName) {
@@ -75,12 +72,12 @@ function spin() {
     }
   }
 
-  // 👉 imam tą, kuri arčiausiai vidurio (gražiausia)
-  const middle = Math.floor(all.length / 2);
+  // imam vidurinę
+  const targetIndex = matches[Math.floor(matches.length / 2)];
+  const finalPosition = targetIndex * itemHeight - visibleCenter;
 
-  let targetIndex = matches.reduce((prev, curr) =>
-    Math.abs(curr - middle) < Math.abs(prev - middle) ? curr : prev
-  );
+  // 👉 RESET transition (labai svarbu)
+  container.style.transition = "none";
 
   let speed = 40;
 
@@ -89,37 +86,21 @@ function spin() {
     container.style.transform = `translateY(-${position}px)`;
   }, 16);
 
-  // 👉 kiek sukasi (reguliuok čia)
+  // 👉 sustabdymas
   setTimeout(() => {
-
     clearInterval(interval);
 
-    const targetElement = all[targetIndex];
-
-    // 👉 tikras centras (pixel-perfect)
-    const slotRect = slot.getBoundingClientRect();
-    const targetRect = targetElement.getBoundingClientRect();
-
-    const offset =
-      targetRect.top - slotRect.top -
-      (slot.clientHeight / 2) +
-      (targetElement.clientHeight / 2);
-
-    const finalPosition = position + offset;
-
-    // 👉 smooth stop
+    // 👉 dabar tiksliai pastatom
     container.style.transition = "transform 2s ease-out";
     container.style.transform = `translateY(-${finalPosition}px)`;
 
     document.getElementById("winner").innerText =
       "🎉 Laimėjo: " + winnerName;
 
-    position = finalPosition; // kad kitą kartą nuo čia tęstų
-
+    position = finalPosition;
     spinning = false;
 
-  }, 5000); // 👈 ilgiau sukasi (keisk jei nori)
-
+  }, 5000);
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
