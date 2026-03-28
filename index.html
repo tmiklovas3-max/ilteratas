@@ -1,44 +1,16 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-<meta charset="UTF-8">
-<title>Laimės ratas</title>
-<style>
-  body { font-family: sans-serif; text-align: center; }
-  #namesContainer {
-    width: 400px;
-    height: 100px;  /* matomas tik vienas vardas */
-    overflow: hidden;
-    border: 2px solid #333;
-    margin: 50px auto;
-    position: relative;
-  }
-  .name {
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-  }
-  #spinBtn {
-    padding: 10px 30px;
-    font-size: 20px;
-    margin-top: 20px;
-  }
-  #winner {
-    font-size: 24px;
-    margin-top: 30px;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laimės Ratas</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <canvas id="wheel"></canvas>
+  <button id="spinBtn">Sukti</button>
 
-<h1>Laimės ratas</h1>
-<div id="namesContainer"></div>
-<button id="spinBtn">SUUK</button>
-<div id="winner"></div>
-
-<script src="script.js"></script>
+  <script src="data.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
