@@ -1,7 +1,7 @@
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 
-// 👉 ČIA įdėk VISUS vardus (galiu įdėti pilną listą jei reikia)
+// 👉 TESTUI (vėliau galėsi įdėti visus 254)
 const segments = [
 "Tomas Miklovas",
 "Juozas Vaiciunas",
@@ -11,12 +11,16 @@ const segments = [
 "Erikas Blynovas",
 "Donatas Skubrys",
 "Kristina Rainienė",
-"Akvilė Kulikauskaitė"
+"Akvilė Kulikauskaitė",
+"Jonas Jonaitis",
+"Ona Onaite",
+"Petras Petraitis"
 ];
 
 let angle = 0;
 let spinning = false;
 
+// resize
 function resize() {
   canvas.width = Math.min(window.innerWidth, window.innerHeight) * 0.9;
   canvas.height = canvas.width;
@@ -25,7 +29,7 @@ function resize() {
 window.addEventListener("resize", resize);
 resize();
 
-const arc = () => (2 * Math.PI) / segments.length;
+const arc = (2 * Math.PI) / segments.length;
 
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
@@ -35,8 +39,8 @@ function draw(rotation = 0) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < segments.length; i++) {
-    const start = i * arc() + rotation;
-    const end = start + arc();
+    const start = i * arc + rotation;
+    const end = start + arc;
 
     ctx.beginPath();
     ctx.fillStyle = i % 2 ? "#0F4C81" : "#00A6A6";
@@ -46,10 +50,10 @@ function draw(rotation = 0) {
 
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(start + arc() / 2);
+    ctx.rotate(start + arc / 2);
 
     ctx.fillStyle = "#fff";
-    ctx.font = `${Math.max(10, radius / segments.length * 4)}px Arial`;
+    ctx.font = "14px Arial";
     ctx.textAlign = "right";
 
     ctx.fillText(segments[i], radius - 10, 5);
@@ -70,8 +74,8 @@ function spin() {
   spinning = true;
 
   const winnerIndex = Math.floor(Math.random() * segments.length);
-  const targetAngle = (2 * Math.PI) - (winnerIndex * arc()) - arc()/2;
 
+  const targetAngle = (2 * Math.PI) - (winnerIndex * arc) - arc/2;
   const final = 8 * 2 * Math.PI + targetAngle;
 
   let start = null;
@@ -98,8 +102,7 @@ function spin() {
 }
 
 function showWinner(index) {
-  const winner = segments[index];
-  document.getElementById("winner").innerText = "🎉 " + winner;
+  document.getElementById("winner").innerText = "🎉 " + segments[index];
 }
 
 document.getElementById("spinBtn").addEventListener("click", spin);
