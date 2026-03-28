@@ -4,9 +4,9 @@ const ctx = canvas.getContext("2d");
 canvas.width = 500;
 canvas.height = 500;
 
-const namesList = window.names;
+const names = window.names;
 
-const segments = namesList.length;
+const segments = names.length;
 const arc = 2 * Math.PI / segments;
 
 let angle = 0;
@@ -14,28 +14,32 @@ let angle = 0;
 function draw(rotation = 0) {
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
-  const radius = canvas.width / 2 - 20;
+  const radius = canvas.width / 2 - 10;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   for (let i = 0; i < segments; i++) {
+    const start = i * arc + rotation;
+    const end = start + arc;
+
     // segmentas
     ctx.beginPath();
-    ctx.fillStyle = i % 2 ? "#eee" : "#ccc";
+    ctx.fillStyle = i % 2 ? "#f2f2f2" : "#d6d6d6";
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, i * arc + rotation, (i + 1) * arc + rotation);
+    ctx.arc(cx, cy, radius, start, end);
     ctx.fill();
 
-    // tekstas (DIDELIS IR AIŠKUS)
+    // 🔥 TEKSTAS (FIX)
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(i * arc + arc / 2 + rotation);
+    ctx.rotate(start + arc / 2);
 
-    ctx.fillStyle = "black";
-    ctx.font = "18px Arial";
-    ctx.textAlign = "right";
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 14px Arial";
+    ctx.textAlign = "center";
 
-    ctx.fillText(namesList[i], radius - 30, 5);
+    // PIEŠIAM ARČIAU CENTRO → kad tikrai matytųsi
+    ctx.fillText(names[i], radius / 1.8, 0);
 
     ctx.restore();
   }
@@ -43,9 +47,9 @@ function draw(rotation = 0) {
   // rodyklė
   ctx.fillStyle = "red";
   ctx.beginPath();
-  ctx.moveTo(cx, 10);
-  ctx.lineTo(cx - 10, 30);
-  ctx.lineTo(cx + 10, 30);
+  ctx.moveTo(cx, 5);
+  ctx.lineTo(cx - 10, 25);
+  ctx.lineTo(cx + 10, 25);
   ctx.fill();
 }
 
@@ -53,7 +57,7 @@ draw();
 
 function spin() {
   const targetName = "Angelė Urbonaitė";
-  const targetIndex = namesList.indexOf(targetName);
+  const targetIndex = names.indexOf(targetName);
 
   let targetAngle = (2 * Math.PI) - (targetIndex * arc) - arc / 2;
 
