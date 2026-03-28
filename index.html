@@ -3,16 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <title>Laimės ratas</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f0f0;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
 
 <canvas id="wheel"></canvas>
 <button id="spinBtn">Sukti</button>
 
-<!-- SVARBU: tvarka -->
-<script src="data.js"></script>
-<script src="script.js"></script>
+<script>
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 500;
+canvas.height = 500;
+
+// 👇 VARDUS DEDAM TIESIAI ČIA
+const names = [
+  "Jonas Jonaitis",
+  "Petras Petraitis",
+  "Ona Onaite",
+  "Angelė Urbonaitė",
+  "Tomas Kazlauskas",
+  "Ieva Petrauskaitė",
+  "Mantas Stankevičius"
+];
+
+const segments = names.length;
+const arc = 2 * Math.PI / segments;
+
+let angle = 0;
+
+function draw(rotation = 0) {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const radius = canvas.width / 2 - 10;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < segments; i++) {
+    const start = i * arc + rotation;
+
+    // segmentas
+    ctx.beginPath();
+    ctx.fillStyle = i % 2 ? "#e3e3e3" : "#cfcfcf";
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, start + arc);
+    ctx.fill();
+
+    // 🔥 SUPER PAPRASTAS TEKSTAS (VISADA MATOSI)
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + arc / 2);
+
+    ctx.fillStyle = "black";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+
+    ctx.fillText(names[i], radius / 2, 0);
+
+    ctx.restore();
+  }
+
+  // rodyklė
+  ctx.fillStyle = "red";
+  ctx.beginPath();
+  ctx.moveTo(cx, 5);
+  ctx.lineTo(cx - 10, 25);
+  ctx.lineTo(cx + 10, 25);
+  ctx.fill();
+}
+
+draw();
+
+function spin() {
+  const targetName = "Angelė Urbonaitė";
+  const targetIndex = names.indexOf(targetName);
+
+  let targetAngle = (2 * Math.PI) - (targetIndex * arc) - arc / 2;
+
+  let final = 6 * 2 * Math.PI + targetAngle;
+
+  let start = null;
+
+  function animate(t) {
+    if (!start) start = t;
+
+    let progress = (t - start) / 3000;
+    if (progress > 1) progress = 1;
+
+    let ease = 1 - Math.pow(1 - progress, 3);
+    angle = final * ease;
+
+    draw(angle);
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      alert("Laimėjo: " + targetName);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+document.getElementById("spinBtn").addEventListener("click", spin);
+</script>
 
 </body>
 </html>
