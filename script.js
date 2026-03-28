@@ -21,11 +21,11 @@ window.onload = async function() {
   for (let i = 1; i < rows.length; i++) {
     const cols = rows[i].split(",");
 
-    const n1 = cols[nameIndex]?.trim();
-    const s1 = cols[surnameIndex]?.trim();
+    const n1 = cols[nameIndex]?.replace(/\r|\n/g, '').trim();
+    const s1 = cols[surnameIndex]?.replace(/\r|\n/g, '').trim();
 
-    const n2 = cols[name2Index]?.trim();
-    const s2 = cols[surname2Index]?.trim();
+    const n2 = cols[name2Index]?.replace(/\r|\n/g, '').trim();
+    const s2 = cols[surname2Index]?.replace(/\r|\n/g, '').trim();
 
     if (n1 && s1) names.push(n1 + " " + s1);
     if (n2 && s2) names.push(n2 + " " + s2);
@@ -34,7 +34,7 @@ window.onload = async function() {
   // cleanup
   names = names.filter(n => n && !n.includes("@") && n.length > 3);
 
-  // sukuriam ilgą listą, kad Angelė būtų pakankamai kartų
+  // sukuriam ilgą listą
   let loop = [];
   for (let i = 0; i < 30; i++) {
     loop = loop.concat(names);
@@ -57,14 +57,28 @@ window.onload = async function() {
   // 🎯 winner
   const winnerName = "Angelė Urbonaitė";
 
+  // helper: normalizuojam tekstą (diakritikai -> paprastos raidės)
+  function normalize(str) {
+    return str
+      .normalize("NFD")                       // atskiria diakritiką
+      .replace(/[\u0300-\u036f]/g, "")        // pašalina diakritiką
+      .replace(/\r|\n/g, '')                  // pašalina newline
+      .trim()
+      .toLowerCase();
+  }
+
   function spin() {
     if (spinning) return;
     spinning = true;
 
     const all = document.querySelectorAll(".name");
 
+    const targetNormalized = normalize(winnerName);
+
     // randam visas Angelės pozicijas
-    const matches = Array.from(all).map((el, i) => el.innerText === winnerName ? i : -1).filter(i => i !== -1);
+    const matches = Array.from(all)
+      .map((el, i) => normalize(el.innerText) === targetNormalized ? i : -1)
+      .filter(i => i !== -1);
 
     if (matches.length === 0) {
       alert("Angelė Urbonaitė nerasta sąraše!");
