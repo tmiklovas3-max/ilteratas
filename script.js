@@ -1,14 +1,34 @@
 window.onload = async function() {
   const container = document.getElementById("names");
 
-  // CSV nuskaitymas
+  // nuskaityti CSV
   const response = await fetch("data.csv");
   const text = await response.text();
 
   const rows = text.split("\n").map(r => r.trim()).filter(r => r.length > 0);
 
+  // Funkcija teisingai padalina CSV eilutę su kabutėmis
+  function parseCSVLine(line) {
+    const result = [];
+    let cur = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        inQuotes = !inQuotes;
+      } else if (c === "," && !inQuotes) {
+        result.push(cur);
+        cur = "";
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur);
+    return result.map(s => s.trim());
+  }
+
   // headers
-  const headers = rows[0].replace(/"/g,'').split(",");
+  const headers = parseCSVLine(rows[0]);
 
   const nameIndex = headers.findIndex(h => h.includes("Vardas") && !h.includes("(2)"));
   const surnameIndex = headers.findIndex(h => h.includes("Pavard") && !h.includes("(2)"));
@@ -16,11 +36,10 @@ window.onload = async function() {
   const name2Index = headers.findIndex(h => h.includes("Vardas (2)"));
   const surname2Index = headers.findIndex(h => h.includes("Pavardė (2)"));
 
-  // names array
   let names = [];
 
   for (let i = 1; i < rows.length; i++) {
-    const cols = rows[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/"/g,'').trim());
+    const cols = parseCSVLine(rows[i]);
 
     const n1 = cols[nameIndex];
     const s1 = cols[surnameIndex];
@@ -31,8 +50,8 @@ window.onload = async function() {
     if (n2 && s2) names.push(n2 + " " + s2);
   }
 
-  // filter empty / emails
-  names = names.filter(n => n && !n.includes("@") && n.length > 3);
+  // filter emails ir tuščius
+  names = names.filter(n => n && !n.includes("@") && n.trim().length > 1);
 
   if (names.length === 0) {
     container.innerText = "Nėra vardų sąraše!";
@@ -41,9 +60,7 @@ window.onload = async function() {
 
   // suformuojam ilgą sąrašą
   let loop = [];
-  for (let i = 0; i < 30; i++) {
-    loop = loop.concat(names);
-  }
+  for (let i = 0; i < 30; i++) loop = loop.concat(names);
 
   // render vardus
   loop.forEach(name => {
